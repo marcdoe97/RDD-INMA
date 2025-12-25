@@ -1,0 +1,47 @@
+-- WARNING: This schema is for context only and is not meant to be run.
+-- Table order and constraints may not be valid for execution.
+
+CREATE TABLE public.api_keys (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  api_id uuid,
+  key_hash text NOT NULL,
+  label text,
+  revoked boolean DEFAULT false,
+  created_at timestamp without time zone DEFAULT now(),
+  CONSTRAINT api_keys_pkey PRIMARY KEY (id),
+  CONSTRAINT api_keys_api_id_fkey FOREIGN KEY (api_id) REFERENCES public.apis(id)
+);
+CREATE TABLE public.api_logs (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  api_id uuid,
+  route_id uuid,
+  status_code integer,
+  latency_ms integer,
+  created_at timestamp without time zone DEFAULT now(),
+  method text,
+  path text,
+  CONSTRAINT api_logs_pkey PRIMARY KEY (id)
+);
+CREATE TABLE public.api_routes (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  api_id uuid,
+  method text NOT NULL,
+  path text NOT NULL,
+  mock_response_json jsonb NOT NULL,
+  status_code integer DEFAULT 200,
+  enabled boolean DEFAULT true,
+  CONSTRAINT api_routes_pkey PRIMARY KEY (id),
+  CONSTRAINT api_routes_api_id_fkey FOREIGN KEY (api_id) REFERENCES public.apis(id)
+);
+CREATE TABLE public.apis (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  name text NOT NULL,
+  version text NOT NULL,
+  base_path text NOT NULL,
+  domain text,
+  owner text,
+  description text,
+  status text DEFAULT 'draft'::text CHECK (status = ANY (ARRAY['draft'::text, 'published'::text, 'deprecated'::text])),
+  created_at timestamp without time zone DEFAULT now(),
+  CONSTRAINT apis_pkey PRIMARY KEY (id)
+);
