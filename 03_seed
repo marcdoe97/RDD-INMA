@@ -1,0 +1,29 @@
+-- 03_seed.sql
+-- Demo data so the prototype works immediately after import.
+
+insert into public.apis (id, name, version, base_path, domain, owner, description, status)
+values
+  ('11111111-1111-1111-1111-111111111111', 'Demo Payments API', 'v1', '/payments', 'demo.local', 'demo', 'Prototype API for RDD demo', 'published')
+on conflict (id) do nothing;
+
+insert into public.api_routes (id, api_id, method, path, mock_response_json, status_code, enabled)
+values
+  ('22222222-2222-2222-2222-222222222222', '11111111-1111-1111-1111-111111111111', 'GET', '/health',
+   '{"status":"ok"}'::jsonb, 200, true),
+  ('33333333-3333-3333-3333-333333333333', '11111111-1111-1111-1111-111111111111', 'POST', '/charge',
+   '{"result":"accepted","id":"ch_123"}'::jsonb, 202, true)
+on conflict (id) do nothing;
+
+-- A few logs for the “latest 20” demo query
+insert into public.api_logs (api_id, route_id, status_code, latency_ms, created_at, method, path)
+values
+  ('11111111-1111-1111-1111-111111111111', '22222222-2222-2222-2222-222222222222', 200, 12, now() - interval '2 minutes', 'GET', '/health'),
+  ('11111111-1111-1111-1111-111111111111', '33333333-3333-3333-3333-333333333333', 202, 85, now() - interval '1 minutes', 'POST', '/charge'),
+  ('11111111-1111-1111-1111-111111111111', null, 500, 240, now() - interval '30 seconds', 'POST', '/charge')
+;
+
+select created_at, api_id, method, path, status_code, latency_ms
+from public.api_logs
+order by created_at desc
+limit 20;
+
