@@ -1,0 +1,16 @@
+-- 02_indexes.sql
+
+-- Fast “latest logs” query
+create index if not exists api_logs_created_at_idx
+  on public.api_logs (created_at desc);
+
+-- Typical filtering / grouping
+create index if not exists api_logs_api_id_created_at_idx
+  on public.api_logs (api_id, created_at desc);
+
+create index if not exists api_routes_api_id_idx
+  on public.api_routes (api_id);
+
+-- Prevent duplicate route definitions per API (optional but useful)
+create unique index if not exists api_routes_unique_per_api
+  on public.api_routes (api_id, method, path);
