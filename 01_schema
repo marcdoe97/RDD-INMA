@@ -1,6 +1,5 @@
 -- 01_schema.sql
 -- Minimal runnable schema for the Supabase prototype
-
 -- Extensions (usually available in Supabase, but safe to declare)
 create extension if not exists pgcrypto;
 
